@@ -1,9 +1,7 @@
 package com.mrwang.sharding;
 
-import com.mrwang.sharding.bean.DictOrderType;
-import com.mrwang.sharding.bean.Orders;
-import com.mrwang.sharding.mapper.DictOrderTypeMapper;
-import com.mrwang.sharding.mapper.OrdersMapper;
+import com.mrwang.sharding.bean.*;
+import com.mrwang.sharding.mapper.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +16,15 @@ class ShardingSphereDemoApplicationTests {
 
     @Autowired
     private DictOrderTypeMapper dictOrderTypeMapper;
+
+    @Autowired
+    private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private AccountMapper accountMapper;
 
     @Test
     public void addOrders() {
@@ -38,6 +45,12 @@ class ShardingSphereDemoApplicationTests {
     }
 
     @Test
+    public void queryOrderItem() {
+        OrderItem orders = orderItemMapper.selectOne(1);
+        System.out.println(orders);
+    }
+
+    @Test
     public void addOrdersDB() {
         for (int i = 1; i <= 10; i++) {
             Orders orders = new Orders();
@@ -52,8 +65,8 @@ class ShardingSphereDemoApplicationTests {
     @Test
     public void queryOrdersDB() {
         Orders orders = new Orders();
-        orders.setCustomerId(7);
-        orders.setId(7);
+        orders.setCustomerId(5);
+        orders.setId(6);
         Orders o = ordersMapper.selectOneDB(orders);
         System.out.println(o);
     }
@@ -70,5 +83,32 @@ class ShardingSphereDemoApplicationTests {
     @Test
     public void deleteDictOrderType() {
         dictOrderTypeMapper.DeleteDictOrderType("1");
+    }
+
+    @Test
+    public void insertUser() {
+        for (int i = 1; i <= 10; i++) {
+            User user = new User();
+            user.setId(i);
+            user.setName("name" + i);
+            userMapper.insert(user);
+        }
+    }
+
+    @Test
+    public void insertAccount() {
+        for (int i = 1; i <= 10; i++) {
+            Account account = new Account();
+            account.setId(i);
+            account.setUserId(i);
+            account.setMoney(i * 100);
+            accountMapper.insert(account);
+        }
+    }
+
+    @Test
+    public void selectAccount() {
+        Account account = accountMapper.findByUserId(1);
+        System.out.println(account);
     }
 }

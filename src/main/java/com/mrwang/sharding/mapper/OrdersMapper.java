@@ -9,24 +9,13 @@ import org.springframework.stereotype.Repository;
 public interface OrdersMapper {
 
     @Insert("insert into orders(id,order_type,customer_id,amount) values(#{id},#{orderType},#{customerId},#{amount})")
-    public void insert(Orders orders);
+    void insert(Orders orders);
 
-    @Select("select * from orders where id = #{id}")
-    @Results({
-            @Result(property = "id",column = "id"),
-            @Result(property = "orderType",column = "order_type"),
-            @Result(property = "customerId",column = "customer_id"),
-            @Result(property = "amount",column = "amount")
-    })
-    public Orders selectOne(Integer id);
+//    @Select("select * from orders a where a.id = #{id}")
+    @Select("select * from orders a left join order_item b on a.id=b.order_id where a.id = #{id}")
+    Orders selectOne(Integer id);
 
 
-    @Select("select * from orders where id = #{id} and customer_id=#{customerId}")
-    @Results({
-            @Result(property = "id",column = "id"),
-            @Result(property = "orderType",column = "order_type"),
-            @Result(property = "customerId",column = "customer_id"),
-            @Result(property = "amount",column = "amount")
-    })
-    public Orders selectOneDB(Orders orders);
+    @Select("select * from orders a inner join order_item b on a.id=b.order_id where a.id = #{id} and a.customer_id=#{customerId}")
+    Orders selectOneDB(Orders orders);
 }

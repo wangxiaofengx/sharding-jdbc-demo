@@ -1,0 +1,93 @@
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+spring:
+  shardingsphere:
+    datasource:
+      ds1:
+        driver-class-name: com.mysql.jdbc.Driver
+        password: 123456
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_1?serverTimezone=UTC
+        username: root
+      ds2:
+        driver-class-name: com.mysql.jdbc.Driver
+        password: 123456
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_2?serverTimezone=UTC
+        username: root
+      ds3:
+        driver-class-name: com.mysql.jdbc.Driver
+        password: 123456
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_user?serverTimezone=UTC
+        username: root
+      ds4:
+        driver-class-name: com.mysql.jdbc.Driver
+        password: 123456
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_account?serverTimezone=UTC
+        username: root
+      names: ds1,ds2,ds3,ds4
+    props:
+      sql-show: true
+      sql-federation-enabled: true
+    rules:
+      sharding:
+        broadcast-tables:
+          - dict_order_type
+#        binding-tables:
+#          - orders,order_item
+        tables:
+          user_info:
+            actual-data-nodes: ds3.user_info
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+          account:
+            actual-data-nodes: ds4.account
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+          dict_order_type:
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+          order_item:
+            actual-data-nodes: ds2.order_item
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+          orders:
+            actual-data-nodes: ds${1..2}.orders_${1..2}
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+            table-strategy:
+              standard:
+                sharding-column: id
+                sharding-algorithm-name: order_id
+            database-strategy:
+              standard:
+                sharding-column: customer_id
+                sharding-algorithm-name: customer_id
+        sharding-algorithms:
+          database-inline:
+            type: INLINE
+            props:
+              algorithm-expression: ds_$->{id%2+1}
+          order_id:
+            type: INLINE
+            props:
+              algorithm-expression: orders_$->{id%2+1}
+          customer_id:
+            type: INLINE
+            props:
+              algorithm-expression: ds$->{customer_id%2+1}
+          order_item_id:
+            type: INLINE
+            props:
+              algorithm-expression: order_item
+        keyGenerators:
+          snowflake:
+            type: SNOWFLAKE
